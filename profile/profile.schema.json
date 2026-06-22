@@ -1,0 +1,133 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/SrikanthVelpuri/ai-job-search/profile.schema.json",
+  "title": "Candidate profile (machine-readable projection of the /setup profile files)",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "identity",
+    "contact",
+    "workAuthorization",
+    "languages",
+    "education",
+    "experience",
+    "skills",
+    "preferences",
+    "eeo",
+    "incompleteFields"
+  ],
+  "properties": {
+    "identity": {
+      "type": "object",
+      "required": ["name", "headline", "summary"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "headline": { "type": "string" },
+        "summary": { "type": "string" }
+      }
+    },
+    "contact": {
+      "type": "object",
+      "required": ["email", "phone", "location", "linkedin", "github", "website"],
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": ["string", "null"] },
+        "location": { "type": "string" },
+        "linkedin": { "type": ["string", "null"] },
+        "github": { "type": ["string", "null"] },
+        "website": { "type": ["string", "null"] }
+      }
+    },
+    "workAuthorization": {
+      "type": "object",
+      "required": ["status", "authorizedToWorkUS", "requiresSponsorship"],
+      "properties": {
+        "status": { "type": "string" },
+        "authorizedToWorkUS": { "type": "boolean" },
+        "requiresSponsorship": { "type": "boolean" }
+      }
+    },
+    "languages": { "type": "array", "items": { "type": "string" } },
+    "education": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["degree", "field", "institution", "start", "end"],
+        "properties": {
+          "degree": { "type": "string" },
+          "field": { "type": "string" },
+          "institution": { "type": "string" },
+          "start": { "type": "string" },
+          "end": { "type": "string" },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "experience": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "company", "location", "start", "end", "bullets"],
+        "properties": {
+          "title": { "type": "string" },
+          "company": { "type": "string" },
+          "location": { "type": "string" },
+          "start": { "type": "string" },
+          "end": { "type": ["string", "null"] },
+          "bullets": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "skills": {
+      "type": "object",
+      "required": ["primary", "secondary", "domain", "tools"],
+      "properties": {
+        "primary": { "type": "array", "items": { "type": "string" } },
+        "secondary": { "type": "array", "items": { "type": "string" } },
+        "domain": { "type": "array", "items": { "type": "string" } },
+        "tools": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "certifications": { "type": "array", "items": { "type": "string" } },
+    "publications": { "type": "array", "items": { "type": "string" } },
+    "awards": { "type": "array", "items": { "type": "string" } },
+    "preferences": {
+      "type": "object",
+      "required": [
+        "titles",
+        "seniority",
+        "remotePreference",
+        "relocateAnywhere",
+        "salaryFloorUSD",
+        "sectors",
+        "dealbreakers",
+        "excludeCompanies"
+      ],
+      "properties": {
+        "titles": { "type": "array", "items": { "type": "string" } },
+        "seniority": { "type": "array", "items": { "type": "string" } },
+        "remotePreference": {
+          "type": "string",
+          "enum": ["remote-only", "hybrid-ok", "onsite-ok", "open"]
+        },
+        "relocateAnywhere": { "type": "boolean" },
+        "salaryFloorUSD": { "type": ["number", "null"] },
+        "sectors": { "type": "array", "items": { "type": "string" } },
+        "dealbreakers": { "type": "array", "items": { "type": "string" } },
+        "excludeCompanies": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "eeo": {
+      "type": "object",
+      "required": ["gender", "race", "veteranStatus", "disabilityStatus", "hispanicLatino"],
+      "properties": {
+        "gender": { "type": "string" },
+        "race": { "type": "string" },
+        "veteranStatus": { "type": "string" },
+        "disabilityStatus": { "type": "string" },
+        "hispanicLatino": { "type": "string" }
+      }
+    },
+    "incompleteFields": { "type": "array", "items": { "type": "string" } }
+  }
+}

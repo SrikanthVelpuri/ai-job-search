@@ -1,0 +1,47 @@
+{
+  "$schema": "./profile.schema.json",
+  "$comment": "Template. Copy to profile.json and fill in (or run /setup, then sync the prose files into here). profile.json is gitignored because it holds personal data.",
+  "identity": {
+    "name": "TODO_SETUP: Your Name",
+    "headline": "TODO_SETUP: LinkedIn-style headline",
+    "summary": "TODO_SETUP: 2-3 sentence professional summary"
+  },
+  "contact": {
+    "email": "TODO_SETUP@example.com",
+    "phone": null,
+    "location": "TODO_SETUP: City, State",
+    "linkedin": null,
+    "github": null,
+    "website": null
+  },
+  "workAuthorization": {
+    "status": "TODO_SETUP: e.g. H-1B / Green Card / US Citizen",
+    "authorizedToWorkUS": true,
+    "requiresSponsorship": false
+  },
+  "languages": ["English"],
+  "education": [],
+  "experience": [],
+  "skills": { "primary": [], "secondary": [], "domain": [], "tools": [] },
+  "certifications": [],
+  "publications": [],
+  "awards": [],
+  "preferences": {
+    "titles": ["Senior Machine Learning Engineer", "Staff Machine Learning Engineer"],
+    "seniority": ["senior", "staff", "lead", "principal"],
+    "remotePreference": "open",
+    "relocateAnywhere": true,
+    "salaryFloorUSD": null,
+    "sectors": ["AI research labs", "AI/ML product companies", "big tech"],
+    "dealbreakers": ["no visa sponsorship", "US citizenship required", "active security clearance required"],
+    "excludeCompanies": ["Amazon"]
+  },
+  "eeo": {
+    "gender": "I don't wish to answer",
+    "race": "I don't wish to answer",
+    "veteranStatus": "I am not a protected veteran",
+    "disabilityStatus": "I don't wish to answer",
+    "hispanicLatino": "I don't wish to answer"
+  },
+  "incompleteFields": ["identity", "contact", "workAuthorization", "education", "experience", "skills"]
+}

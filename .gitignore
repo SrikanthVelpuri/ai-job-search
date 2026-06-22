@@ -67,3 +67,28 @@ upskill/*.md
 
 # Agent usage logs
 .agents/
+
+# ── Autonomous job-application system (agent/ + mcp/) ──
+node_modules/
+agent/dist/
+mcp/dist/
+
+# Tracker DB + run artifacts (personal)
+data/jobs.db
+data/jobs.db-*
+data/screenshots/*
+!data/screenshots/.gitkeep
+data/STOP
+data/reports/*
+!data/reports/.gitkeep
+data/resumes/
+agent/data_acc/
+agent/playwright-report/
+
+# Real profile is personal — commit profile.example.json instead
+profile/profile.json
+
+# Lane export drop zone (personal CSVs from AIApply / Jobright)
+data/imports/*
+!data/imports/.gitkeep
+

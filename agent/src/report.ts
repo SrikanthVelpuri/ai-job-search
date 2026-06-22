@@ -1,0 +1,144 @@
+/**
+ * report.ts — dated markdown report (plan Phase 6).
+ *
+ * Summarizes the tracker: new matches, drafts ready, queue, per-lane response rates, guardrail
+ * status, and recent audit events. Pure read over the DB; writes to data/reports/report-<date>.md.
+ */
+
+import fs from "node:fs";
+import path from "node:path";
+import type { AppConfig, ApplicationRow, Lane } from "./types.js";
+import { Tracker } from "./tracker/db.js";
+import { killSwitchActive } from "./apply/guardrails.js";
+
+const LANES: Lane[] = ["custom", "aiapply", "jobright"];
+
+function countBy<T extends string>(rows: ApplicationRow[], key: (r: ApplicationRow) => T): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const r of rows) {
+    const k = key(r);
+    out[k] = (out[k] ?? 0) + 1;
+  }
+  return out;
+}
+
+function table(headers: string[], rows: string[][]): string {
+  const head = `| ${headers.join(" | ")} |`;
+  const sep = `| ${headers.map(() => "---").join(" | ")} |`;
+  const body = rows.map((r) => `| ${r.join(" | ")} |`).join("\n");
+  return [head, sep, body].join("\n");
+}
+
+export interface ReportResult {
+  date: string;
+  markdown: string;
+  path: string;
+}
+
+/** Build the report markdown for a given ISO date (defaults to now). */
+export function buildReport(tracker: Tracker, config: AppConfig, isoDate: string): string {
+  const cfg = config.guardrails;
+  const allApps: ApplicationRow[] = [];
+  for (const lane of LANES) allApps.push(...tracker.listApplications({ lane }));
+
+  const totalJobs = tracker.countJobs();
+  const byStatus = countBy(allApps, (r) => r.status);
+  const byLane = countBy(allApps, (r) => r.lane);
+
+  // Per-lane response analytics: submitted vs outcome.
+  const laneRows = LANES.map((lane) => {
+    const apps = allApps.filter((a) => a.lane === lane);
+    const submitted = apps.filter((a) => a.status === "submitted").length;
+    const responses = apps.filter((a) => a.outcome && /interview|response|reply|offer|reject/i.test(a.outcome)).length;
+    const rate = submitted > 0 ? `${Math.round((responses / submitted) * 100)}%` : "—";
+    return [lane, String(apps.length), String(submitted), String(responses), rate];
+  });
+
+  // Today's new matches: jobs fetched today, top by nothing (no score col) → most recent.
+  const todayPrefix = isoDate.slice(0, 10);
+  const recentJobs = tracker.listJobs({ limit: 200 }).filter((j) => j.fetchedAt.startsWith(todayPrefix));
+  const newMatchRows = recentJobs
+    .slice(0, 25)
+    .map((j) => [String(j.id), j.company, j.title.slice(0, 60), j.ats, j.remote ? "remote" : (j.location || "—").slice(0, 24)]);
+
+  const drafts = allApps.filter((a) => a.status === "tailored" || a.status === "filled");
+  const queue = allApps.filter((a) => a.status === "queued" || a.status === "scored");
+  const needsReview = allApps.filter((a) => a.status === "needs_review");
+
+  const events = tracker.listEvents({ limit: 20 });
+
+  const lines: string[] = [];
+  lines.push(`# Job-Apply Daily Report — ${todayPrefix}`);
+  lines.push("");
+  lines.push(
+    `**Mode:** \`${cfg.applyMode.toUpperCase()}\` · **Daily cap:** ${cfg.dailyCap} · **Fit threshold:** ${cfg.fitThreshold} · ` +
+      `**ATS allowlist:** ${cfg.atsAllowlist.join(", ")} · **Kill switch:** ${killSwitchActive(cfg) ? "🛑 ACTIVE" : "off"}`,
+  );
+  lines.push("");
+  lines.push("## Totals");
+  lines.push("");
+  lines.push(`- Jobs in tracker: **${totalJobs}**`);
+  lines.push(`- Applications: **${allApps.length}** — ${Object.entries(byStatus).map(([k, v]) => `${k}: ${v}`).join(", ") || "none"}`);
+  lines.push(`- By lane: ${Object.entries(byLane).map(([k, v]) => `${k}: ${v}`).join(", ") || "none"}`);
+  lines.push("");
+
+  lines.push("## Per-lane response rates");
+  lines.push("");
+  lines.push(table(["Lane", "Apps", "Submitted", "Responses", "Rate"], laneRows));
+  lines.push("");
+
+  lines.push(`## New matches today (${recentJobs.length})`);
+  lines.push("");
+  lines.push(newMatchRows.length ? table(["#", "Company", "Title", "ATS", "Location"], newMatchRows) : "_None today._");
+  lines.push("");
+
+  lines.push(`## Drafts ready (${drafts.length})`);
+  lines.push("");
+  lines.push(
+    drafts.length
+      ? table(
+          ["App", "Job", "Status", "Fit"],
+          drafts.slice(0, 25).map((a) => [String(a.id), String(a.jobId), a.status, a.fitScore?.toFixed(0) ?? "—"]),
+        )
+      : "_None._",
+  );
+  lines.push("");
+
+  lines.push(`## Apply queue (${queue.length}) · Needs human review (${needsReview.length})`);
+  lines.push("");
+  if (needsReview.length) {
+    lines.push(
+      table(
+        ["App", "Job", "Reason"],
+        needsReview.slice(0, 25).map((a) => [String(a.id), String(a.jobId), (a.notes ?? "").slice(0, 70)]),
+      ),
+    );
+    lines.push("");
+  }
+
+  lines.push("## Recent events");
+  lines.push("");
+  lines.push(
+    events.length
+      ? events.map((e) => `- \`${e.ts.slice(0, 19)}\` [${e.level}] ${e.message}`).join("\n")
+      : "_No events._",
+  );
+  lines.push("");
+  lines.push("---");
+  lines.push(
+    `_Generated by the autonomous job-apply orchestrator. ${cfg.applyMode === "dryrun" ? "DRY-RUN: nothing was submitted." : "LIVE mode."}_`,
+  );
+
+  return lines.join("\n");
+}
+
+/** Build + write the report to data/reports/report-<date>.md. */
+export function writeReport(tracker: Tracker, config: AppConfig, isoDate: string = new Date().toISOString()): ReportResult {
+  const markdown = buildReport(tracker, config, isoDate);
+  const date = isoDate.slice(0, 10);
+  const dir = path.join(config.rootDir, "data", "reports");
+  fs.mkdirSync(dir, { recursive: true });
+  const outPath = path.join(dir, `report-${date}.md`);
+  fs.writeFileSync(outPath, markdown, "utf8");
+  return { date, markdown, path: outPath };
+}

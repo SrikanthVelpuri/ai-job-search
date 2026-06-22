@@ -1,0 +1,30 @@
+{
+  "$comment": "Top tech + AI/ML employers that sponsor H-1B, EXCLUDING Amazon (plan §1, design §2.2). Tagged by connector tier; handles live-verified at build time (2026-06-21). clean_ats handles are confirmed against the public Greenhouse/Lever/Ashby JSON APIs. Workday + custom_site are sourcing-only (apply deferred). Hugging Face uses Workable (no v1 connector) so it is disabled.",
+  "companies": [
+    { "name": "Anthropic", "tier": "clean_ats", "ats": "greenhouse", "handle": "anthropic", "sponsorsH1B": true, "verified": true, "enabled": true },
+    { "name": "OpenAI", "tier": "clean_ats", "ats": "ashby", "handle": "openai", "sponsorsH1B": true, "verified": true, "enabled": true },
+    { "name": "Databricks", "tier": "clean_ats", "ats": "greenhouse", "handle": "databricks", "sponsorsH1B": true, "verified": true, "enabled": true },
+    { "name": "Scale AI", "tier": "clean_ats", "ats": "greenhouse", "handle": "scaleai", "sponsorsH1B": true, "verified": true, "enabled": true, "notes": "On Greenhouse, not Lever/Ashby (corrected at build time)." },
+    { "name": "Cohere", "tier": "clean_ats", "ats": "ashby", "handle": "cohere", "sponsorsH1B": true, "verified": true, "enabled": true, "notes": "On Ashby, not Lever (corrected at build time)." },
+    { "name": "Hugging Face", "tier": "clean_ats", "ats": "other", "handle": "huggingface", "sponsorsH1B": true, "verified": false, "enabled": false, "notes": "Uses Workable (apply.workable.com/huggingface); no v1 connector. Source via Adzuna instead." },
+    { "name": "Perplexity AI", "tier": "clean_ats", "ats": "ashby", "handle": "perplexity", "sponsorsH1B": true, "verified": true, "enabled": true, "notes": "Handle is 'perplexity', not 'perplexity-ai'." },
+    { "name": "Mistral AI", "tier": "clean_ats", "ats": "lever", "handle": "mistral", "sponsorsH1B": false, "verified": true, "enabled": true },
+    { "name": "Together AI", "tier": "clean_ats", "ats": "greenhouse", "handle": "togetherai", "sponsorsH1B": true, "verified": true, "enabled": true, "notes": "On Greenhouse, not Ashby (corrected at build time)." },
+    { "name": "Datadog", "tier": "clean_ats", "ats": "greenhouse", "handle": "datadog", "sponsorsH1B": true, "verified": true, "enabled": true },
+    { "name": "Reddit", "tier": "clean_ats", "ats": "greenhouse", "handle": "reddit", "sponsorsH1B": true, "verified": true, "enabled": true },
+    { "name": "Pinterest", "tier": "clean_ats", "ats": "greenhouse", "handle": "pinterest", "sponsorsH1B": true, "verified": true, "enabled": true },
+    { "name": "Stripe", "tier": "clean_ats", "ats": "greenhouse", "handle": "stripe", "sponsorsH1B": true, "verified": true, "enabled": true },
+    { "name": "Snowflake", "tier": "clean_ats", "ats": "ashby", "handle": "snowflake", "sponsorsH1B": true, "verified": true, "enabled": true },
+    { "name": "Figma", "tier": "clean_ats", "ats": "greenhouse", "handle": "figma", "sponsorsH1B": true, "verified": true, "enabled": true },
+    { "name": "Notion", "tier": "clean_ats", "ats": "ashby", "handle": "Notion", "sponsorsH1B": true, "verified": true, "enabled": true, "notes": "On Ashby (handle 'Notion'), not Greenhouse (corrected at build time)." },
+    { "name": "Ramp", "tier": "clean_ats", "ats": "ashby", "handle": "ramp", "sponsorsH1B": true, "verified": true, "enabled": true },
+    { "name": "Glean", "tier": "clean_ats", "ats": "greenhouse", "handle": "gleanwork", "sponsorsH1B": true, "verified": true, "enabled": true, "notes": "Handle is 'gleanwork', not 'glean'." },
+    { "name": "NVIDIA", "tier": "workday", "ats": "workday", "handle": "nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite", "sponsorsH1B": true, "verified": false, "enabled": false, "notes": "Workday apply deferred to Phase 4b; sourcing only." },
+    { "name": "Salesforce", "tier": "workday", "ats": "workday", "handle": "salesforce.wd12.myworkdayjobs.com/External_Career_Site", "sponsorsH1B": true, "verified": false, "enabled": false, "notes": "Workday apply deferred to Phase 4b; sourcing only." },
+    { "name": "Google", "tier": "custom_site", "ats": "other", "handle": "google.com/about/careers", "sponsorsH1B": true, "verified": false, "enabled": false, "notes": "Custom site: login + bot detection. Source via Adzuna; apply attended." },
+    { "name": "Meta", "tier": "custom_site", "ats": "other", "handle": "metacareers.com", "sponsorsH1B": true, "verified": false, "enabled": false, "notes": "Custom site. Source via Adzuna; apply attended." },
+    { "name": "Apple", "tier": "custom_site", "ats": "other", "handle": "jobs.apple.com", "sponsorsH1B": true, "verified": false, "enabled": false, "notes": "Custom site. Source via Adzuna; apply attended." },
+    { "name": "Netflix", "tier": "custom_site", "ats": "other", "handle": "explore.jobs.netflix.net", "sponsorsH1B": true, "verified": false, "enabled": false, "notes": "Custom site. Source via Adzuna; apply attended." },
+    { "name": "Microsoft", "tier": "custom_site", "ats": "other", "handle": "careers.microsoft.com", "sponsorsH1B": true, "verified": false, "enabled": false, "notes": "Custom site. Source via Adzuna; apply attended." }
+  ]
+}
