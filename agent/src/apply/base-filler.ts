@@ -16,6 +16,14 @@
 
 import type { Browser, Locator, Page } from "playwright";
 import type { AtsKind, FillContext, FillResult } from "../types.js";
+import {
+  validateResumeFile,
+  verifyResumeAttached,
+  selectComboboxByLabel,
+  checkRequiredConsentBoxes,
+  findUnfilledRequiredFields,
+  verifySubmissionConfirmed,
+} from "./form-verify.js";
 
 /** Per-action timeout for individual fills/clicks. Kept short so a missing field fails fast. */
 export const ACTION_TIMEOUT_MS = 5_000;
@@ -102,6 +110,17 @@ export async function detectLoginWall(page: Page): Promise<boolean> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * Generic English/question stopwords that must NOT drive attribute-substring field matching — they
+ * appear in too many unrelated field names and cause cross-field leakage (e.g. "you" → "How did you
+ * hear about this job?"). Keep this to filler words only; never add domain keywords like "name".
+ */
+const ATTR_MATCH_STOPWORDS = new Set([
+  "you", "your", "are", "the", "for", "and", "with", "this", "that", "have", "has", "will", "now",
+  "any", "did", "how", "what", "when", "where", "which", "who", "why", "our", "their", "about",
+  "would", "could", "should", "into", "from", "been", "were", "was", "please", "select", "currently",
+]);
+
+/**
  * Build a single Locator that targets a text/textarea control whose label, placeholder, name,
  * id, or aria-label matches any of the given patterns. Strategies, in order of reliability:
  *   1. getByLabel  — proper <label for=…> association (most reliable, accessibility-first).
@@ -111,7 +130,11 @@ export async function detectLoginWall(page: Page): Promise<boolean> {
  * Returns the first locator that resolves to ≥1 element, or null if nothing matched. We never
  * guess blindly: callers treat a null result as "field not found → flag it".
  */
-async function locateLabelledInput(page: Page, labelPatterns: RegExp[]): Promise<Locator | null> {
+async function locateLabelledInput(
+  page: Page,
+  labelPatterns: RegExp[],
+  allowAttrFallback = true,
+): Promise<Locator | null> {
   // Strategy 1 + 2: label / placeholder association via Playwright's accessibility-aware getters.
   for (const re of labelPatterns) {
     const byLabel = page.getByLabel(re).first();
@@ -121,15 +144,22 @@ async function locateLabelledInput(page: Page, labelPatterns: RegExp[]): Promise
     if ((await byPlaceholder.count().catch(() => 0)) > 0) return byPlaceholder;
   }
 
+  // Strategy 3 is loose (keyword-in-attribute) and can grab an unrelated field when the label text
+  // doesn't match the form's wording — fine for distinctive contact fields, DANGEROUS for screening
+  // answers (a wrong answer in the wrong field). Callers that map answers pass allowAttrFallback=false.
+  if (!allowAttrFallback) return null;
+
   // Strategy 3: attribute-substring match. Derive plain keywords from the regex source so e.g.
   // /first\s*name/i contributes "first" and "name", then probe name/id/aria-label attributes.
+  // Common stopwords are dropped: a token like "you" would otherwise match "How did you hear…" and
+  // leak an unrelated answer into the wrong field (the 2026-06-25 "Yes"-in-how-did-you-hear bug).
   for (const re of labelPatterns) {
     const keywords = re.source
       .toLowerCase()
       .replace(/[\\^$.*+?()[\]{}|]/g, " ") // strip regex metacharacters
       .replace(/\bs\b/g, " ") // drop leftover \s tokens
       .split(/\s+/)
-      .filter((w) => w.length >= 3);
+      .filter((w) => w.length >= 3 && !ATTR_MATCH_STOPWORDS.has(w));
     for (const kw of keywords) {
       const sel =
         `input[name*="${kw}" i], input[id*="${kw}" i], input[aria-label*="${kw}" i], ` +
@@ -150,9 +180,10 @@ export async function fillTextByLabel(
   page: Page,
   labelPatterns: RegExp[],
   value: string | null | undefined,
+  allowAttrFallback = true,
 ): Promise<boolean> {
   if (value === null || value === undefined || value === "") return false;
-  const loc = await locateLabelledInput(page, labelPatterns);
+  const loc = await locateLabelledInput(page, labelPatterns, allowAttrFallback);
   if (!loc) return false;
   try {
     await loc.fill(value, { timeout: ACTION_TIMEOUT_MS });
@@ -306,10 +337,15 @@ export interface FillerSpec {
  * ════════════════════════════════════════════════════════════════════════════════════════════
  *  CRITICAL SAFETY INVARIANT — READ BEFORE EDITING
  *  We NEVER click submit unless ALL of the following hold:
- *    1. ctx.mode === "live"               (dryrun is the default and MUST stop before submit)
+ *    1. ctx.mode === "live"                    (dryrun is the default and MUST stop before submit)
  *    2. ctx.answers.hasUnanswerable === false  (no fabricated/blank required screening answers)
- *    3. flaggedFields.length === 0        (every field we couldn't fill blocks submit, per
- *                                          ON_UNKNOWN_FIELD = skip_and_flag)
+ *    3. flaggedFields.length === 0             (every field WE tried and couldn't fill blocks submit)
+ *    4. the resume artifact validates AND is actually attached to the form
+ *    5. ctx.atsScore >= atsMinScore            (don't submit a poorly-matched resume)
+ *    6. findUnfilledRequiredFields(page) === [] (the LIVE form has NO empty required field — this is
+ *                                               what stops partial/rejected submits)
+ *  And even after clicking submit we only record outcome:"submitted" when
+ *  verifySubmissionConfirmed() sees a real confirmation; otherwise outcome:"rejected" (needs human).
  *  In dryrun we fill + screenshot then RETURN outcome:"filled", submitted:false — no click, ever.
  *  If you add an early submit path, you are introducing a guardrail violation. Do not.
  * ════════════════════════════════════════════════════════════════════════════════════════════
@@ -382,14 +418,34 @@ export async function runStandardFill(
     }
   }
 
-  // 4) Resume upload.
-  if (!(await uploadResume(page, ctx.artifacts.resumePath))) {
-    flaggedFields.push("resume upload");
+  // 3b) Derived profile fields ATS forms commonly mark required. Best-effort + honest (real profile
+  //     data only): if any of these is required and we miss it, findUnfilledRequiredFields catches it
+  //     and blocks submit — so we never fabricate, we just fill what we truthfully can.
+  if (ctx.profile.contact.linkedin) await fillTextByLabel(page, [/linkedin/i, /linked\s*in/i], ctx.profile.contact.linkedin);
+  const currentJob = ctx.profile.experience.find((e) => e.end === null) ?? ctx.profile.experience[0];
+  if (currentJob?.company) {
+    await fillTextByLabel(
+      page,
+      [/current\s*(employer|company)/i, /present\s*(employer|company)/i, /company\s*name/i, /current\s*company/i],
+      currentJob.company,
+    );
+  }
+  // "How did you hear about this job?" — we sourced this from the company's own careers/ATS board,
+  // so "Company Website" is the truthful answer. Try a text field, then a combobox.
+  const heardPatterns = [/how did you hear/i, /how.*hear about/i, /referral source/i, /source/i];
+  if (!(await fillTextByLabel(page, heardPatterns, "Company Website"))) {
+    await selectComboboxByLabel(page, heardPatterns, "Company Website");
   }
 
+  // 4) Resume upload + verify it actually attached (catches the "Resume/CV is required" rejection).
+  const resumeUploaded = await uploadResume(page, ctx.artifacts.resumePath);
+  const resumeAttached = resumeUploaded && (await verifyResumeAttached(page, ctx.artifacts.resumePath));
+  if (!resumeAttached) flaggedFields.push("resume upload");
+
   // 5) Screening answers → map each to a field by its question label. Unanswerable / needs-human
-  //    answers are never typed: we flag them so the safety gate can block submit. Booleans and
-  //    string[] are coerced to text; native selects are attempted via selectOptionByLabel first.
+  //    answers are never typed: we flag them so the safety gate can block submit. For choice-type
+  //    questions (select/multiselect/boolean) we try a native <select>, then a JS combobox, then
+  //    plain text; only if all fail do we flag.
   for (const aq of ctx.answers.answers) {
     const label = aq.question.label;
     const patterns = [labelToPattern(label)];
@@ -399,73 +455,89 @@ export async function runStandardFill(
       continue;
     }
 
-    if (aq.question.type === "select" || aq.question.type === "multiselect") {
-      const optionText = answerToText(aq.answer);
-      if (optionText && (await selectOptionByLabel(page, patterns, optionText))) continue;
-      // Could not select natively (likely a JS combobox) → flag rather than guess.
+    const optionText = answerToText(aq.answer);
+    if (!optionText) {
       flaggedFields.push(label);
       continue;
     }
 
-    const text = answerToText(aq.answer);
-    if (!text) {
+    // Screening answers map by PRECISE label only (allowAttrFallback=false) so a canned answer can
+    // never leak into an unrelated field whose attributes happen to share a keyword.
+    const isChoice =
+      aq.question.type === "select" || aq.question.type === "multiselect" || aq.question.type === "boolean";
+    if (isChoice) {
+      if (await selectOptionByLabel(page, patterns, optionText)) continue;
+      if (await selectComboboxByLabel(page, patterns, optionText)) continue;
+      if (await fillTextByLabel(page, patterns, optionText, false)) continue;
       flaggedFields.push(label);
       continue;
     }
-    if (!(await fillTextByLabel(page, patterns, text))) {
-      flaggedFields.push(label);
-    }
+
+    if (await fillTextByLabel(page, patterns, optionText, false)) continue;
+    if (await selectComboboxByLabel(page, patterns, optionText)) continue;
+    flaggedFields.push(label);
   }
+
+  // 5b) Tick required consent / terms / privacy checkboxes (ATS forms gate submit on these).
+  const consentChecked = await checkRequiredConsentBoxes(page);
+  if (consentChecked > 0) notes.push(`checked ${consentChecked} required consent box(es)`);
 
   // 6) Screenshot the filled form (audit record, guardrails.md §5) regardless of mode.
   const shotPath = await screenshot(page, ctx.screenshotPath);
 
+  // Read the LIVE form for any required field still empty — independent of our question list.
+  const missingRequired = await findUnfilledRequiredFields(page);
+
   // 7) ── THE SAFETY GATE ──────────────────────────────────────────────────────────────────────
-  // Dryrun (default): stop here. Filled + screenshotted, NEVER submitted.
+  // Dryrun (default): stop here, but REPORT whether the form would be submittable so the operator
+  // can see real readiness without anything being sent.
   if (ctx.mode !== "live") {
+    const readiness =
+      missingRequired.length || flaggedFields.length
+        ? `WOULD NOT submit live — ${missingRequired.length} required field(s) empty${
+            missingRequired.length ? ` [${missingRequired.join("; ")}]` : ""
+          }${flaggedFields.length ? `; flagged: ${flaggedFields.join("; ")}` : ""}`
+        : "all required fields satisfied — WOULD be submittable live";
     return {
       outcome: "filled",
       screenshotPath: shotPath,
       submitted: false,
       flaggedFields,
-      notes: joinNotes(notes, "dryrun: filled and screenshotted, did not submit"),
+      notes: joinNotes(notes, `dryrun: filled + screenshotted; ${readiness}`),
     };
   }
 
-  // Live mode, but unanswerable screening questions → never submit (no-fabrication rule).
+  // ── LIVE gate — each check below must pass or we skip+flag (never a partial/forced submit). ──
+
+  // (a) No-fabrication: any unanswerable screening question blocks.
   if (ctx.answers.hasUnanswerable) {
-    return {
-      outcome: "skipped",
-      screenshotPath: shotPath,
-      submitted: false,
-      flaggedFields,
-      notes: joinNotes(notes, "unanswerable screening questions"),
-    };
+    return skip(shotPath, flaggedFields, notes, "unanswerable screening questions");
   }
-
-  // Live mode, but some fields could not be filled → skip + flag (ON_UNKNOWN_FIELD policy).
+  // (b) Resume artifact must be a real, non-empty, correctly-framed file (verify the docx).
+  const resumeVal = validateResumeFile(ctx.artifacts.resumePath);
+  if (!resumeVal.ok) {
+    return skip(shotPath, flaggedFields, notes, `resume artifact invalid: ${resumeVal.reason}`);
+  }
+  // (c) ATS keyword score must clear the floor (don't submit a poorly-matched resume).
+  const atsMin = ctx.atsMinScore ?? 0;
+  if (typeof ctx.atsScore === "number" && ctx.atsScore < atsMin) {
+    return skip(shotPath, flaggedFields, notes, `ATS score ${ctx.atsScore} < min ${atsMin}`);
+  }
+  // (d) Any field WE tried and couldn't fill (includes resume-not-attached) blocks.
   if (flaggedFields.length > 0) {
-    return {
-      outcome: "skipped",
-      screenshotPath: shotPath,
-      submitted: false,
-      flaggedFields,
-      notes: joinNotes(notes, `unfilled fields, not submitting: ${flaggedFields.join("; ")}`),
-    };
+    return skip(shotPath, flaggedFields, notes, `unfilled fields: ${flaggedFields.join("; ")}`);
+  }
+  // (e) Any REQUIRED field on the live form still empty blocks — the core anti-false-submit check.
+  if (missingRequired.length > 0) {
+    return skip(shotPath, [...flaggedFields, ...missingRequired], notes, `required form fields empty: ${missingRequired.join("; ")}`);
   }
 
-  // Live mode AND clean (no unanswerable, no flagged fields): this is the ONLY place a submit
-  // click is allowed in the entire apply cluster.
+  // All gates passed: this is the ONLY place a submit click is allowed in the entire apply cluster.
   const submitBtn = await spec.findSubmitButton(page);
   if (!submitBtn) {
-    return {
-      outcome: "skipped",
-      screenshotPath: shotPath,
-      submitted: false,
-      flaggedFields: ["submit button"],
-      notes: joinNotes(notes, "submit button not found; not submitting"),
-    };
+    return skip(shotPath, ["submit button"], notes, "submit button not found");
   }
+  const beforeUrl = page.url();
   try {
     await submitBtn.click({ timeout: ACTION_TIMEOUT_MS });
   } catch {
@@ -477,14 +549,37 @@ export async function runStandardFill(
       notes: joinNotes(notes, "submit click failed"),
     };
   }
-  // Re-screenshot the post-submit confirmation state, overwriting the pre-submit shot.
+
+  // POST-SUBMIT VERIFICATION — only "submitted" when a real confirmation is observed; otherwise the
+  // form rejected the click (e.g. a required field we couldn't see) → "rejected" for human follow-up.
+  const confirm = await verifySubmissionConfirmed(page, beforeUrl);
   const confirmShot = (await screenshot(page, ctx.screenshotPath)) ?? shotPath;
+  if (confirm.confirmed) {
+    return {
+      outcome: "submitted",
+      screenshotPath: confirmShot,
+      submitted: true,
+      flaggedFields,
+      notes: joinNotes(notes, `live: submitted (confirmed: ${confirm.signal})`),
+    };
+  }
   return {
-    outcome: "submitted",
+    outcome: "rejected",
     screenshotPath: confirmShot,
-    submitted: true,
+    submitted: false,
     flaggedFields,
-    notes: joinNotes(notes, "live: submitted"),
+    notes: joinNotes(notes, `live: submit clicked but NOT confirmed (${confirm.signal}) — needs human`),
+  };
+}
+
+/** Build a skip FillResult (filled but not submitted) with a reason. */
+function skip(shotPath: string | null, flaggedFields: string[], notes: string[], reason: string): FillResult {
+  return {
+    outcome: "skipped",
+    screenshotPath: shotPath,
+    submitted: false,
+    flaggedFields,
+    notes: joinNotes(notes, `not submitting: ${reason}`),
   };
 }
 

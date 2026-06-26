@@ -22,7 +22,7 @@ import { openTracker } from "./tracker/db.js";
 import { loadProfile, loadWatchlist, loadAnswerBank } from "./profile.js";
 import { sourceAll, type SourceRunResult } from "./sources/index.js";
 import { scoreJob, passesThreshold } from "./scoring/score.js";
-import { writeAtsResume } from "./tailoring/ats-resume.js";
+import { writeTailoredArtifacts } from "./tailoring/ats-resume.js";
 import { generateScreeningAnswers } from "./tailoring/screening-answers.js";
 import { applyToJob, type ApplyEngineResult } from "./apply/index.js";
 import { writeReport, type ReportResult } from "./report.js";
@@ -115,9 +115,16 @@ export async function runOrchestrator(opts: OrchestratorOptions = {}): Promise<O
     if (!entry) continue;
     const { job, score } = entry;
 
-    // Tailor: ATS-safe resume + screening answers (no fabrication).
-    const { path: resumePath } = await writeAtsResume(profile, job, resumeDir);
+    // Tailor: ATS-safe resume (.txt + reliable .docx) + screening answers (no fabrication),
+    // and score the resume's ATS keyword-match against this posting at generation time.
+    const { txtPath, docxPath, ats } = await writeTailoredArtifacts(profile, job, resumeDir);
     const answers = generateScreeningAnswers(job, STANDARD_QUESTIONS, profile, answerBank);
+    tracker.logEvent(
+      "info",
+      `ATS ${ats.score}/100 (kw ${ats.keywordScore}%, ${ats.matched.length}/${ats.jdKeywordCount} JD terms) for job ${job.id} ${job.company} — ${job.title}` +
+        (ats.missing.length ? ` | gaps: ${ats.missing.slice(0, 10).join(", ")}` : ""),
+      "custom",
+    );
 
     if (opts.skipApply || attempted >= maxApply) {
       // Beyond the apply budget → record a ready queue entry for the next run / human.
@@ -126,21 +133,23 @@ export async function runOrchestrator(opts: OrchestratorOptions = {}): Promise<O
         lane: "custom",
         status: "queued",
         fitScore: score.overall,
-        resumePath,
+        resumePath: docxPath,
         answersJson: JSON.stringify(answers),
         mode: cfg.applyMode,
-        notes: "queued (apply budget reached or skipApply)",
+        notes: `queued (apply budget reached or skipApply); ATS ${ats.score}/100; txt ${txtPath}`,
       });
       queued++;
       continue;
     }
 
+    // Upload the Word doc (ATS parses .docx most reliably); pass the ATS score for the live gate.
     const result = await applyToJob({
       job,
       profile,
-      artifacts: { resumePath },
+      artifacts: { resumePath: docxPath },
       answers,
       score,
+      atsScore: ats.score,
       tracker,
       config,
     });

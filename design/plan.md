@@ -141,10 +141,12 @@ until Phase 7.
    H-1B, **excluding Amazon**. **Locations: open — willing to relocate anywhere**, no geographic
    filter (remote also in scope).
 
+### Resolved (answered 2026-06-24)
+3. **Remote preference & salary floor:** **Open to all** (remote/hybrid/onsite — no geo filter, relocation OK) and **no salary floor**. → no remote or salary prefilter is applied.
+4. **Daily application cap:** **5/day** during the live ramp (`DAILY_CAP=5`; code default stays 3 until live). Start there, raise as response data comes in.
+5. **Captcha policy:** **skip-and-flag** (`CAPTCHA_POLICY=skip_and_flag`, already the default) — detect, skip that app, log for manual handling.
+
 ### Still open
-3. **Remote preference & salary floor** — remote-only / hybrid-ok / onsite-ok? Minimum base salary? (filtering)
-4. **Daily application cap** for unattended (suggest 3–5/day during ramp).
-5. **Captcha policy:** skip-and-flag (recommended) vs. pause-for-human.
 6. **Do AIApply / Jobright export/import a job list**, or only manual log? (couples Lanes B/C)
 7. **Workday now or later?** (Recommend later.)
 

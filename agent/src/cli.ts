@@ -14,12 +14,13 @@
  */
 
 import fs from "node:fs";
+import path from "node:path";
 import { loadConfig } from "./config.js";
 import { openTracker } from "./tracker/db.js";
 import { loadProfile, loadWatchlist, loadAnswerBank } from "./profile.js";
 import { sourceAll } from "./sources/index.js";
 import { scoreJob, passesThreshold } from "./scoring/score.js";
-import { writeAtsResume } from "./tailoring/ats-resume.js";
+import { writeTailoredArtifacts } from "./tailoring/ats-resume.js";
 import { generateScreeningAnswers } from "./tailoring/screening-answers.js";
 import { applyToJob } from "./apply/index.js";
 import { writeReport } from "./report.js";
@@ -112,9 +113,14 @@ async function main(): Promise<void> {
         process.exit(1);
       }
       const score = scoreJob(job, profile);
-      const { path: resumePath } = await writeAtsResume(profile, job, `${config.rootDir}/data/resumes`);
+      const { txtPath, docxPath, ats, warnings } = await writeTailoredArtifacts(profile, job, `${config.rootDir}/data/resumes`);
+      if (warnings.length) console.log(`  resume warnings: ${warnings.join("; ")}`);
+      console.log(`  ATS match: ${ats.score}/100 (keywords ${ats.keywordScore}%, title ${ats.titleScore}%, ${ats.matched.length}/${ats.jdKeywordCount} JD terms) → ${path.basename(docxPath)}`);
+      if (ats.missing.length) console.log(`  ATS gaps (JD terms not in resume): ${ats.missing.slice(0, 12).join(", ")}`);
+      t.logEvent("info", `ATS ${ats.score}/100 for job ${jobId} (${job.company}); resume ${path.basename(docxPath)} / ${path.basename(txtPath)}`, "custom");
       const answers = generateScreeningAnswers(job, STANDARD_QUESTIONS, profile, answerBank);
-      const res = await applyToJob({ job, profile, artifacts: { resumePath }, answers, score, tracker: t, config });
+      // Upload the Word doc (ATS parses .docx most reliably); pass the ATS score for the live gate.
+      const res = await applyToJob({ job, profile, artifacts: { resumePath: docxPath }, answers, score, atsScore: ats.score, tracker: t, config });
       console.log(`apply [${config.guardrails.applyMode}] job ${jobId} → ${res.status}`);
       console.log(`  allowed: ${res.decision.allowed}${res.decision.blockReasons.length ? ` (${res.decision.blockReasons.join("; ")})` : ""}`);
       if (res.fill) console.log(`  outcome: ${res.fill.outcome}, submitted: ${res.fill.submitted}, screenshot: ${res.fill.screenshotPath ?? "none"}`);

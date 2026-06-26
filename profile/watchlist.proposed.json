@@ -51,12 +51,12 @@
     {
       "name": "Hugging Face",
       "tier": "clean_ats",
-      "ats": "workable",
+      "ats": "other",
       "handle": "huggingface",
       "sponsorsH1B": true,
-      "verified": true,
-      "enabled": true,
-      "notes": "On Workable; sourced via the workable connector. Apply is attended (Workable not in the apply allowlist)."
+      "verified": false,
+      "enabled": false,
+      "notes": "Uses Workable (apply.workable.com/huggingface); no v1 connector. Source via Adzuna instead."
     },
     {
       "name": "Perplexity AI",

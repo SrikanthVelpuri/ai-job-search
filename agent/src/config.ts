@@ -34,7 +34,7 @@ function envMode(name: string, fallback: ApplyMode): ApplyMode {
 function envAtsList(name: string, fallback: AtsKind[]): AtsKind[] {
   const v = process.env[name];
   if (!v) return fallback;
-  const valid: AtsKind[] = ["greenhouse", "lever", "ashby", "workday", "other"];
+  const valid: AtsKind[] = ["greenhouse", "lever", "ashby", "smartrecruiters", "workable", "workday", "other"];
   const parsed = v
     .split(",")
     .map((s) => s.trim().toLowerCase())
@@ -52,6 +52,7 @@ export function loadGuardrails(): GuardrailConfig {
     dailyCap: envInt("DAILY_CAP", 3),
     perCompanyDays: envInt("PER_COMPANY_DAYS", 30),
     fitThreshold: envInt("FIT_THRESHOLD", 70),
+    atsMinScore: envInt("ATS_MIN_SCORE", 60),
     atsAllowlist: envAtsList("ATS_ALLOWLIST", ["greenhouse", "lever", "ashby"]),
     captchaPolicy: envStr("CAPTCHA_POLICY", "skip_and_flag") === "pause_for_human" ? "pause_for_human" : "skip_and_flag",
     onUnknownField: envStr("ON_UNKNOWN_FIELD", "skip_and_flag") === "pause_for_human" ? "pause_for_human" : "skip_and_flag",

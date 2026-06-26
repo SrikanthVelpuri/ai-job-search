@@ -21,13 +21,22 @@ import { prefilter } from "../scoring/filters.js";
 import { fetchGreenhouse } from "./greenhouse.js";
 import { fetchLever } from "./lever.js";
 import { fetchAshby } from "./ashby.js";
+import { fetchSmartRecruiters } from "./smartrecruiters.js";
+import { fetchWorkable } from "./workable.js";
 import { fetchAdzuna } from "./adzuna.js";
 
-/** ATS → connector. Workday / custom-site (`other`) have no clean API connector in v1. */
+/**
+ * ATS → connector. Greenhouse/Lever/Ashby/SmartRecruiters/Workable all expose public board
+ * APIs we can source from. (SmartRecruiters/Workable have no validated apply filler yet, so the
+ * guardrail allowlist blocks auto-submit — clean-source / attended-apply.) Workday / custom-site
+ * (`other`) have no clean API connector in v1.
+ */
 const CONNECTORS: Partial<Record<string, Connector>> = {
   greenhouse: fetchGreenhouse,
   lever: fetchLever,
   ashby: fetchAshby,
+  smartrecruiters: fetchSmartRecruiters,
+  workable: fetchWorkable,
 };
 
 export interface CompanySourceResult {

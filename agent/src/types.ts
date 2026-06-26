@@ -15,13 +15,22 @@ import type { Page } from "playwright";
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Which applicant-tracking-system a posting / form belongs to. */
-export type AtsKind = "greenhouse" | "lever" | "ashby" | "workday" | "other";
+export type AtsKind =
+  | "greenhouse"
+  | "lever"
+  | "ashby"
+  | "smartrecruiters"
+  | "workable"
+  | "workday"
+  | "other";
 
 /** Where a job row originated. */
 export type SourceKind =
   | "greenhouse"
   | "lever"
   | "ashby"
+  | "smartrecruiters"
+  | "workable"
   | "adzuna"
   | "jobright"
   | "aiapply"
@@ -294,6 +303,8 @@ export interface GuardrailConfig {
   atsAllowlist: AtsKind[]; // default [greenhouse, lever, ashby]
   captchaPolicy: "skip_and_flag" | "pause_for_human";
   onUnknownField: "skip_and_flag" | "pause_for_human";
+  /** Minimum ATS keyword-match score (0-100) required before a live submit. Default 60. */
+  atsMinScore: number;
   /** Tier tokens that always require human review even when unattended. */
   reviewRequiredTiers: string[];
   killFile: string; // default "data/STOP"
@@ -325,7 +336,8 @@ export interface GuardrailDecision {
 
 export type FillOutcome =
   | "filled" // dryrun: filled + screenshotted, stopped before submit
-  | "submitted" // live: submitted
+  | "submitted" // live: submitted AND a post-submit confirmation was verified
+  | "rejected" // live: submit was clicked but no confirmation appeared (form rejected it) → needs human
   | "skipped"
   | "failed"
   | "captcha"
@@ -340,6 +352,10 @@ export interface FillContext {
   /** Where the filler must save its screenshot. */
   screenshotPath: string;
   mode: ApplyMode;
+  /** ATS keyword-match score (0-100) of the resume vs this JD; gated before live submit. */
+  atsScore?: number | null;
+  /** Minimum ATS score required to submit live (guardrail; falls back to config default). */
+  atsMinScore?: number;
 }
 
 export interface FillResult {

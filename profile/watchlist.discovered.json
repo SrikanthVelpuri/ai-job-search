@@ -1,0 +1,837 @@
+[
+  {
+    "name": "AI21 Labs",
+    "found": false
+  },
+  {
+    "name": "Contextual AI",
+    "found": false
+  },
+  {
+    "name": "Sakana AI",
+    "found": false
+  },
+  {
+    "name": "Luma AI",
+    "found": false
+  },
+  {
+    "name": "Adept",
+    "found": false
+  },
+  {
+    "name": "Hebbia",
+    "found": false
+  },
+  {
+    "name": "Jasper",
+    "found": true,
+    "ats": "workable",
+    "handle": "jasper",
+    "total": 1,
+    "matching": 0,
+    "samples": []
+  },
+  {
+    "name": "Tome",
+    "found": false
+  },
+  {
+    "name": "Copy.ai",
+    "found": false
+  },
+  {
+    "name": "Sana",
+    "found": false
+  },
+  {
+    "name": "Consensus",
+    "found": false
+  },
+  {
+    "name": "Replicate",
+    "found": false
+  },
+  {
+    "name": "Groq",
+    "found": false
+  },
+  {
+    "name": "Modular",
+    "found": false
+  },
+  {
+    "name": "Predibase",
+    "found": false
+  },
+  {
+    "name": "Outerbounds",
+    "found": false
+  },
+  {
+    "name": "Weights & Biases",
+    "found": false
+  },
+  {
+    "name": "WhyLabs",
+    "found": false
+  },
+  {
+    "name": "Patronus AI",
+    "found": false
+  },
+  {
+    "name": "Humanloop",
+    "found": false
+  },
+  {
+    "name": "deepset",
+    "found": false
+  },
+  {
+    "name": "Qdrant",
+    "found": false
+  },
+  {
+    "name": "Chroma",
+    "found": false
+  },
+  {
+    "name": "Marqo",
+    "found": false
+  },
+  {
+    "name": "Cleanlab",
+    "found": false
+  },
+  {
+    "name": "OctoAI",
+    "found": false
+  },
+  {
+    "name": "Confluent",
+    "found": true,
+    "ats": "ashby",
+    "handle": "confluent",
+    "total": 47,
+    "matching": 0,
+    "samples": []
+  },
+  {
+    "name": "dbt Labs",
+    "found": false
+  },
+  {
+    "name": "Dagster",
+    "found": false
+  },
+  {
+    "name": "Tecton",
+    "found": false
+  },
+  {
+    "name": "Hex",
+    "found": false
+  },
+  {
+    "name": "Census",
+    "found": false
+  },
+  {
+    "name": "Monte Carlo",
+    "found": false
+  },
+  {
+    "name": "Coalesce",
+    "found": false
+  },
+  {
+    "name": "Temporal",
+    "found": false
+  },
+  {
+    "name": "Hasura",
+    "found": false
+  },
+  {
+    "name": "Replit",
+    "found": false
+  },
+  {
+    "name": "Sourcegraph",
+    "found": false
+  },
+  {
+    "name": "Tabnine",
+    "found": false
+  },
+  {
+    "name": "Codeium",
+    "found": false
+  },
+  {
+    "name": "Anysphere",
+    "found": false
+  },
+  {
+    "name": "Cognition AI",
+    "found": true,
+    "ats": "ashby",
+    "handle": "cognition",
+    "total": 68,
+    "matching": 0,
+    "samples": []
+  },
+  {
+    "name": "Augment Code",
+    "found": false
+  },
+  {
+    "name": "Poolside",
+    "found": false
+  },
+  {
+    "name": "Magic AI",
+    "found": false
+  },
+  {
+    "name": "Render",
+    "found": false
+  },
+  {
+    "name": "Railway",
+    "found": false
+  },
+  {
+    "name": "Retool",
+    "found": false
+  },
+  {
+    "name": "Linear",
+    "found": false
+  },
+  {
+    "name": "Grammarly",
+    "found": false
+  },
+  {
+    "name": "Plaid",
+    "found": false
+  },
+  {
+    "name": "Rippling",
+    "found": false
+  },
+  {
+    "name": "Deel",
+    "found": false
+  },
+  {
+    "name": "Vanta",
+    "found": false
+  },
+  {
+    "name": "DoorDash",
+    "found": false
+  },
+  {
+    "name": "Box",
+    "found": false
+  },
+  {
+    "name": "HashiCorp",
+    "found": false
+  },
+  {
+    "name": "Aurora",
+    "found": false
+  },
+  {
+    "name": "Applied Intuition",
+    "found": false
+  },
+  {
+    "name": "Skild AI",
+    "found": false
+  },
+  {
+    "name": "Anduril",
+    "found": false
+  },
+  {
+    "name": "Saronic",
+    "found": false
+  },
+  {
+    "name": "Skydio",
+    "found": true,
+    "ats": "ashby",
+    "handle": "skydio",
+    "total": 125,
+    "matching": 2,
+    "samples": [
+      "Senior Autonomy Engineer - Deep Learning",
+      "Senior Autonomy Engineer - Deep Learning"
+    ]
+  },
+  {
+    "name": "Insitro",
+    "found": false
+  },
+  {
+    "name": "Recursion",
+    "found": false
+  },
+  {
+    "name": "EvolutionaryScale",
+    "found": false
+  },
+  {
+    "name": "Cradle",
+    "found": false
+  },
+  {
+    "name": "Iambic Therapeutics",
+    "found": false
+  },
+  {
+    "name": "Latent Labs",
+    "found": false
+  },
+  {
+    "name": "Abridge",
+    "found": false
+  },
+  {
+    "name": "Ambience Healthcare",
+    "found": false
+  },
+  {
+    "name": "Hippocratic AI",
+    "found": false
+  },
+  {
+    "name": "OpenEvidence",
+    "found": false
+  },
+  {
+    "name": "Tempus",
+    "found": false
+  },
+  {
+    "name": "Cleerly",
+    "found": false
+  },
+  {
+    "name": "Notable",
+    "found": false
+  },
+  {
+    "name": "Surge AI",
+    "found": false
+  },
+  {
+    "name": "V7",
+    "found": false
+  },
+  {
+    "name": "Encord",
+    "found": false
+  },
+  {
+    "name": "Roboflow",
+    "found": false
+  },
+  {
+    "name": "Ada",
+    "found": false
+  },
+  {
+    "name": "Forethought",
+    "found": false
+  },
+  {
+    "name": "Replicant",
+    "found": false
+  },
+  {
+    "name": "Lindy",
+    "found": false
+  },
+  {
+    "name": "MultiOn",
+    "found": false
+  },
+  {
+    "name": "Vespa",
+    "found": false
+  },
+  {
+    "name": "Twelve Labs",
+    "found": false
+  },
+  {
+    "name": "Ideogram",
+    "found": true,
+    "ats": "ashby",
+    "handle": "Ideogram",
+    "total": 8,
+    "matching": 0,
+    "samples": []
+  },
+  {
+    "name": "Krea",
+    "found": false
+  },
+  {
+    "name": "Captions",
+    "found": false
+  },
+  {
+    "name": "Synthesia",
+    "found": false
+  },
+  {
+    "name": "Cartesia",
+    "found": false
+  },
+  {
+    "name": "Deepgram",
+    "found": false
+  },
+  {
+    "name": "Sesame",
+    "found": false
+  },
+  {
+    "name": "Photoroom",
+    "found": false
+  },
+  {
+    "name": "Pika",
+    "found": true,
+    "ats": "ashby",
+    "handle": "pika",
+    "total": 3,
+    "matching": 0,
+    "samples": []
+  },
+  {
+    "name": "Higgsfield",
+    "found": false
+  },
+  {
+    "name": "Tavus",
+    "found": false
+  },
+  {
+    "name": "Crusoe",
+    "found": false
+  },
+  {
+    "name": "Hyperbolic",
+    "found": false
+  },
+  {
+    "name": "Voltage Park",
+    "found": false
+  },
+  {
+    "name": "Vast.ai",
+    "found": true,
+    "ats": "ashby",
+    "handle": "vastai",
+    "total": 1,
+    "matching": 0,
+    "samples": []
+  },
+  {
+    "name": "TensorWave",
+    "found": false
+  },
+  {
+    "name": "Substrate",
+    "found": false
+  },
+  {
+    "name": "Turbopuffer",
+    "found": false
+  },
+  {
+    "name": "LanceDB",
+    "found": false
+  },
+  {
+    "name": "Activeloop",
+    "found": false
+  },
+  {
+    "name": "StarTree",
+    "found": false
+  },
+  {
+    "name": "Materialize",
+    "found": false
+  },
+  {
+    "name": "Redpanda",
+    "found": false
+  },
+  {
+    "name": "RisingWave",
+    "found": false
+  },
+  {
+    "name": "MotherDuck",
+    "found": true,
+    "ats": "ashby",
+    "handle": "Motherduck",
+    "total": 6,
+    "matching": 0,
+    "samples": []
+  },
+  {
+    "name": "Estuary",
+    "found": false
+  },
+  {
+    "name": "Decodable",
+    "found": false
+  },
+  {
+    "name": "StreamNative",
+    "found": false
+  },
+  {
+    "name": "Timescale",
+    "found": false
+  },
+  {
+    "name": "DataStax",
+    "found": false
+  },
+  {
+    "name": "Crew AI",
+    "found": false
+  },
+  {
+    "name": "Relevance AI",
+    "found": false
+  },
+  {
+    "name": "Stack AI",
+    "found": false
+  },
+  {
+    "name": "Dust",
+    "found": false
+  },
+  {
+    "name": "Ema",
+    "found": false
+  },
+  {
+    "name": "Maven AGI",
+    "found": false
+  },
+  {
+    "name": "Moveworks",
+    "found": false
+  },
+  {
+    "name": "Aisera",
+    "found": false
+  },
+  {
+    "name": "Crescendo",
+    "found": false
+  },
+  {
+    "name": "11x",
+    "found": false
+  },
+  {
+    "name": "Artisan",
+    "found": false
+  },
+  {
+    "name": "Lorikeet",
+    "found": true,
+    "ats": "ashby",
+    "handle": "lorikeet",
+    "total": 4,
+    "matching": 0,
+    "samples": []
+  },
+  {
+    "name": "Tektonic",
+    "found": false
+  },
+  {
+    "name": "Cognigy",
+    "found": false
+  },
+  {
+    "name": "Kore.ai",
+    "found": true,
+    "ats": "smartrecruiters",
+    "handle": "koreai",
+    "total": 1,
+    "matching": 0,
+    "samples": []
+  },
+  {
+    "name": "Credal",
+    "found": false
+  },
+  {
+    "name": "Guru",
+    "found": false
+  },
+  {
+    "name": "Qodo",
+    "found": false
+  },
+  {
+    "name": "Continue",
+    "found": true,
+    "ats": "ashby",
+    "handle": "Continue",
+    "total": 3,
+    "matching": 0,
+    "samples": []
+  },
+  {
+    "name": "Tabby",
+    "found": false
+  },
+  {
+    "name": "Greptile",
+    "found": false
+  },
+  {
+    "name": "CodeRabbit",
+    "found": false
+  },
+  {
+    "name": "Mintlify",
+    "found": false
+  },
+  {
+    "name": "Sweep",
+    "found": false
+  },
+  {
+    "name": "Tessl",
+    "found": false
+  },
+  {
+    "name": "Factory AI",
+    "found": false
+  },
+  {
+    "name": "Reflection AI",
+    "found": false
+  },
+  {
+    "name": "Omni",
+    "found": false
+  },
+  {
+    "name": "Lightdash",
+    "found": false
+  },
+  {
+    "name": "Cube",
+    "found": false
+  },
+  {
+    "name": "Datafold",
+    "found": false
+  },
+  {
+    "name": "Secoda",
+    "found": false
+  },
+  {
+    "name": "Preset",
+    "found": false
+  },
+  {
+    "name": "Mercor",
+    "found": false
+  },
+  {
+    "name": "Micro1",
+    "found": false
+  },
+  {
+    "name": "Handshake AI",
+    "found": false
+  },
+  {
+    "name": "Pareto",
+    "found": false
+  },
+  {
+    "name": "Sapien",
+    "found": false
+  },
+  {
+    "name": "iMerit",
+    "found": false
+  },
+  {
+    "name": "Sama",
+    "found": false
+  },
+  {
+    "name": "Datology AI",
+    "found": false
+  },
+  {
+    "name": "1X Technologies",
+    "found": false
+  },
+  {
+    "name": "Collaborative Robotics",
+    "found": false
+  },
+  {
+    "name": "Gecko Robotics",
+    "found": false
+  },
+  {
+    "name": "Chef Robotics",
+    "found": false
+  },
+  {
+    "name": "Field AI",
+    "found": true,
+    "ats": "lever",
+    "handle": "field-ai",
+    "total": 95,
+    "matching": 6,
+    "samples": [
+      "1.11 Senior Research Engineer – Humanoid Manipulation",
+      "Senior Machine Learning Platform Engineer",
+      "Senior Robot Perception Engineer"
+    ]
+  },
+  {
+    "name": "Sanctuary AI",
+    "found": false
+  },
+  {
+    "name": "Machina Labs",
+    "found": false
+  },
+  {
+    "name": "Gatik",
+    "found": false
+  },
+  {
+    "name": "Oxa",
+    "found": false
+  },
+  {
+    "name": "Pony.ai",
+    "found": false
+  },
+  {
+    "name": "Plus",
+    "found": false
+  },
+  {
+    "name": "Mach Industries",
+    "found": false
+  },
+  {
+    "name": "Castelion",
+    "found": false
+  },
+  {
+    "name": "Hadrian",
+    "found": false
+  },
+  {
+    "name": "Insilico Medicine",
+    "found": false
+  },
+  {
+    "name": "Chai Discovery",
+    "found": false
+  },
+  {
+    "name": "Noetik",
+    "found": false
+  },
+  {
+    "name": "Periodic Labs",
+    "found": false
+  },
+  {
+    "name": "Future House",
+    "found": false
+  },
+  {
+    "name": "Cyera",
+    "found": false
+  },
+  {
+    "name": "Semgrep",
+    "found": false
+  },
+  {
+    "name": "Lakera",
+    "found": false
+  },
+  {
+    "name": "Snyk",
+    "found": false
+  },
+  {
+    "name": "Wiz",
+    "found": false
+  },
+  {
+    "name": "Protect AI",
+    "found": false
+  },
+  {
+    "name": "Dropzone AI",
+    "found": false
+  },
+  {
+    "name": "Sardine",
+    "found": false
+  },
+  {
+    "name": "Unit21",
+    "found": false
+  },
+  {
+    "name": "Rogo",
+    "found": true,
+    "ats": "ashby",
+    "handle": "rogo",
+    "total": 51,
+    "matching": 0,
+    "samples": []
+  },
+  {
+    "name": "Brightwave",
+    "found": false
+  },
+  {
+    "name": "Parafin",
+    "found": true,
+    "ats": "ashby",
+    "handle": "parafin",
+    "total": 21,
+    "matching": 1,
+    "samples": [
+      "Senior Software Engineer, ML Platform"
+    ]
+  }
+]

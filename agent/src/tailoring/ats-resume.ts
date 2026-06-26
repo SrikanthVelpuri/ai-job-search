@@ -21,6 +21,8 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { JobRow, Profile, ProfileEducation, ProfileExperience } from "../types.js";
 import { SETUP_SENTINEL } from "../profile.js";
+import { buildResumeDocx } from "./docx-resume.js";
+import { atsMatch, type AtsMatchResult } from "../tooling/ats-match.js";
 
 /** ASCII bullet prefix — never a unicode glyph (parsers choke on "•"). */
 const BULLET = "- ";
@@ -222,4 +224,41 @@ export async function writeAtsResume(
   const filePath = path.join(outDir, fileName);
   await writeFile(filePath, text, "utf8");
   return { path: filePath, warnings };
+}
+
+/** Tailored resume artifacts for one job: plain-text + Word, plus the ATS keyword score. */
+export interface TailoredArtifacts {
+  /** Plain-text resume (kept for scoring / debugging). */
+  txtPath: string;
+  /** Reliable Word (.docx) resume — the artifact uploaded to ATS forms. */
+  docxPath: string;
+  /** ATS keyword-match score of the tailored resume against THIS job's JD. */
+  ats: AtsMatchResult;
+  warnings: string[];
+}
+
+/**
+ * Build + persist the tailored resume in BOTH formats and score it for this job.
+ *
+ * The plain-text resume is the single source of truth; the .docx is rendered from
+ * the exact same text (so they never diverge) and is what the apply engine uploads,
+ * because ATS widgets parse Word more reliably than .txt. The ATS keyword score is
+ * computed here, at generation time, so the operator/orchestrator can see how well
+ * the resume keyword-matches the posting (and which JD keywords are missing) before
+ * anything is submitted.
+ */
+export async function writeTailoredArtifacts(
+  profile: Profile,
+  job: JobRow,
+  outDir: string,
+): Promise<TailoredArtifacts> {
+  const { text, warnings } = buildAtsResume(profile, job);
+  await mkdir(outDir, { recursive: true });
+  const base = `ats_resume_${slugify(job.company)}_${job.id}`;
+  const txtPath = path.join(outDir, `${base}.txt`);
+  const docxPath = path.join(outDir, `${base}.docx`);
+  await writeFile(txtPath, text, "utf8");
+  await writeFile(docxPath, await buildResumeDocx(text));
+  const ats = atsMatch(text, job);
+  return { txtPath, docxPath, ats, warnings };
 }

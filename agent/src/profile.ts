@@ -82,7 +82,7 @@ const watchlistSchema = z.object({
     z.object({
       name: z.string(),
       tier: z.enum(["clean_ats", "workday", "custom_site"]),
-      ats: z.enum(["greenhouse", "lever", "ashby", "workday", "other"]),
+      ats: z.enum(["greenhouse", "lever", "ashby", "smartrecruiters", "workable", "workday", "other"]),
       handle: z.string().optional(),
       notes: z.string().optional(),
       sponsorsH1B: z.boolean().optional(),

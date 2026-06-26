@@ -51,6 +51,8 @@ export interface ApplyInput {
   artifacts: ApplyArtifacts;
   answers: ScreeningAnswerSet;
   score: ScoreResult | null;
+  /** ATS keyword-match score (0-100) of the tailored resume vs this JD; gated before live submit. */
+  atsScore?: number | null;
   tracker: Tracker;
   config: AppConfig;
 }
@@ -77,6 +79,7 @@ function statusFor(outcome: FillResult["outcome"]): ApplicationStatus {
     case "captcha":
     case "login_required":
     case "unknown_field":
+    case "rejected": // submit clicked but no confirmation → a human should verify/finish it
       return "needs_review";
     case "skipped":
       return "skipped";
@@ -143,7 +146,16 @@ export async function applyToJob(input: ApplyInput): Promise<ApplyEngineResult> 
     `${slug(job.company)}_${job.id}_${cfg.applyMode}.png`,
   );
 
-  const ctx: FillContext = { job, profile, artifacts, answers, screenshotPath, mode: cfg.applyMode };
+  const ctx: FillContext = {
+    job,
+    profile,
+    artifacts,
+    answers,
+    screenshotPath,
+    mode: cfg.applyMode,
+    atsScore: input.atsScore ?? null,
+    atsMinScore: cfg.atsMinScore,
+  };
 
   let fill: FillResult;
   let browser: Awaited<ReturnType<typeof launchBrowser>> | null = null;
